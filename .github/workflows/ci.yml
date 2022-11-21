@@ -74,13 +74,12 @@ jobs:
 
       - name: Run networking tests
         run: |
+          docker ps
           docker-compose version
           id -u
           id -g
           cat /etc/resolv.conf
           dig google.com
-          dig test-site.tribe
-          ping test-site.tribe
           curl -v http://test-site.tribe
           curl -v https://github.com
           docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests id -u
