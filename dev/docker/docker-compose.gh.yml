@@ -19,9 +19,6 @@ services:
   mysql:
     image: mariadb
     container_name: tribe-mysql
-    volumes:
-      - '${TRIBE_MYSQL_DATA_DIR:-~/mysql_data}:/var/lib/mysql'
-      - './mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro'
     environment:
       - MYSQL_ROOT_PASSWORD=password
     ports:
