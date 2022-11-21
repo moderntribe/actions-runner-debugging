@@ -80,10 +80,10 @@ jobs:
           id -g
           cat /etc/resolv.conf
           dig google.com
-          curl -v http://test-site.tribe
           curl -v https://github.com
           docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests id -u
           docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests id -g
+          docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v http://test-site.tribe
           docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://github.com
           docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://google.com
         working-directory: dev/docker
