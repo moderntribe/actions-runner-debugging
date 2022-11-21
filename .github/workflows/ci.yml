@@ -117,3 +117,7 @@ jobs:
         run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://google.com
         working-directory: dev/docker
         continue-on-error: true
+
+      - name: Show docker-compose logs
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} logs
+        working-directory: dev/docker
