@@ -1,0 +1,23 @@
+{
+    "name": "moderntribe/actions-runner-debugging",
+    "description": "Testing github actions",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Moderntribe\\ActionsRunnerDebugging\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {
+      "johnpbloch/wordpress-core": "6.1.1",
+      "johnpbloch/wordpress-core-installer": "2.0.*"
+    },
+    "extra": {
+      "wordpress-install-dir": "wp"
+    },
+    "config": {
+        "allow-plugins": {
+            "johnpbloch/wordpress-core-installer": true
+        }
+    }
+}

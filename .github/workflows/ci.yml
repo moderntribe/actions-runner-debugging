@@ -1,0 +1,90 @@
+name: GitHub actions networking debugging.
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  ci:
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        operating-system: [ ubuntu-latest ]
+        php-versions: [ '8.0' ]
+
+    env:
+      cache_version: 2 # increment to flush all caches
+      PROJECT_ID: test-site
+      COMPOSE_INTERACTIVE_NO_CLI: 1
+      COMPOSE_FILE: docker-compose.yml:docker-compose.gh.yml
+
+    steps:
+      # Try to disable tcp offloading to fix flaky network connections
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: Disable TCP/UDP offload
+        run: sudo ethtool -K eth0 tx off rx off
+
+      - name: Set up PHP, with composer and extensions
+        uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
+        env:
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Create local config
+        run: |
+          printf 'SQ1_UID=%d\nSQ1_GID=%d\n' $(id -u) $(id -g) > dev/docker/.env
+
+      - name: Create composer config files
+        run: |
+          mkdir -p dev/docker/composer
+          printf '{ "config": {}, "repositories": { "packagist": { "type": "composer", "url": "https://packagist.org" } } }' > dev/docker/composer/config.json
+          printf '{ "github-oauth": { "github.com": "%s" } }\n' "${{ secrets.GITHUB_TOKEN }}" > dev/docker/composer/auth.json
+
+      - name: Check for Cached Composer Dependencies
+        id: cache-composer-dependencies
+        uses: actions/cache@v1
+        with:
+          path: dev/docker/composer/cache
+          key: ${{ runner.os }}-${{ env.cache_version }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-${{ env.cache_version }}-composer-
+
+      - name: Create docker network
+        run: docker network create --driver=bridge --subnet=172.20.10.0/24 global_proxy
+        working-directory: dev/docker
+
+      - name: Start project containers
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} up -d --force-recreate
+        working-directory: dev/docker
+
+      - name: Install composer dependencies
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-fpm composer install --optimize-autoloader -d /application/www
+        working-directory: dev/docker
+
+      - name: Create test databases
+        run: |
+          mysql -h 127.0.0.1 -uroot -ppassword -e "CREATE DATABASE tribe_test_site_tests;"
+          mysql -h 127.0.0.1 -uroot -ppassword -e "CREATE DATABASE tribe_test_site_acceptance;"
+
+      - name: Run networking tests
+        run: |
+          docker-composer version
+          id -u
+          id -g
+          cat /etc/resolv.conf
+          dig google.com
+          dig test-site.tribe
+          ping test-site.tribe
+          curl -v http://test-site.tribe
+          curl -v https://github.com
+          docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests id -u
+          docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests id -g
+          docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://github.com
+          docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://google.com
+        working-directory: dev/docker

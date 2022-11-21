@@ -1,0 +1,8 @@
+.idea/
+
+# Project
+vendor/
+/wp/
+
+# Docker
+dev/docker/composer/
