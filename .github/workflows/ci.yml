@@ -99,7 +99,6 @@ jobs:
       - name: Show container resolv.conf
         run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests cat /etc/resolv.conf
         working-directory: dev/docker
-        continue-on-error: true
 
       - name: Show docker user and group
         run: |
@@ -110,18 +109,18 @@ jobs:
       - name: Curl test-site.tribe from inside the container
         run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -Lv http://test-site.tribe
         working-directory: dev/docker
-        continue-on-error: true
 
       - name: Curl github.com from inside the container
         run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://github.com
         working-directory: dev/docker
-        continue-on-error: true
 
       - name: Curl google.com from inside the container
         run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://google.com
         working-directory: dev/docker
-        continue-on-error: true
 
-      - name: Show docker-compose logs after
-        run: docker-compose --project-name=${{ env.PROJECT_ID }} logs
-        working-directory: dev/docker
+      - name: Display data on failure
+        if: ${{ failure() }}
+        run: |
+          docker ps
+          docker network ls
+          docker-compose --project-name=${{ env.PROJECT_ID }} logs
