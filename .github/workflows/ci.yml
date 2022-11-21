@@ -63,6 +63,10 @@ jobs:
         run: docker-compose --project-name=${{ env.PROJECT_ID }} up -d --force-recreate
         working-directory: dev/docker
 
+      - name: Show docker-compose logs before
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} logs
+        working-directory: dev/docker
+
       - name: Install composer dependencies
         run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-fpm composer install --optimize-autoloader -d /application/www
         working-directory: dev/docker
@@ -118,6 +122,6 @@ jobs:
         working-directory: dev/docker
         continue-on-error: true
 
-      - name: Show docker-compose logs
+      - name: Show docker-compose logs after
         run: docker-compose --project-name=${{ env.PROJECT_ID }} logs
         working-directory: dev/docker
