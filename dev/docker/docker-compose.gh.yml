@@ -29,6 +29,11 @@ services:
     networks:
       proxy:
         ipv4_address: 172.20.10.200
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      interval: 1s
+      timeout: 5s
+      retries: 30
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -43,6 +48,9 @@ services:
       - "1025:1025"
 
   webserver-tests:
+    depends_on:
+      mysql:
+        condition: service_healthy
     ports:
       - "80:80"
       - "443:443"
