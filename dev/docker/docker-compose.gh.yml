@@ -17,7 +17,7 @@ services:
         ipv4_address: 172.20.10.250
 
   mysql:
-    image: mariadb
+    image: mariadb:10.5
     container_name: tribe-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=password
