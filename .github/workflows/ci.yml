@@ -99,7 +99,7 @@ jobs:
         working-directory: dev/docker
 
       - name: Curl test-site.tribe from inside the container
-        run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v http://test-site.tribe
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -Lv http://test-site.tribe
         working-directory: dev/docker
 
       - name: Curl github.com from inside the container
