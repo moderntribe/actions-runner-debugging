@@ -92,6 +92,11 @@ jobs:
       - name: curl github.com
         run: curl -v https://github.com
 
+      - name: Show container resolv.conf
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests cat /etc/resolv.conf
+        working-directory: dev/docker
+        continue-on-error: true
+
       - name: Show docker user and group
         run: |
           docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests id -u
