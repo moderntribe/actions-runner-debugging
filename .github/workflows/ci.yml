@@ -74,7 +74,7 @@ jobs:
 
       - name: Run networking tests
         run: |
-          docker-composer version
+          docker-compose version
           id -u
           id -g
           cat /etc/resolv.conf
