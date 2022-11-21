@@ -72,18 +72,40 @@ jobs:
           mysql -h 127.0.0.1 -uroot -ppassword -e "CREATE DATABASE tribe_test_site_tests;"
           mysql -h 127.0.0.1 -uroot -ppassword -e "CREATE DATABASE tribe_test_site_acceptance;"
 
-      - name: Run networking tests
+      - name: Show running containers
+        run: docker ps
+
+      - name: Show docker compose version
+        run: docker-compose version
+
+      - name: Show user & group
         run: |
-          docker ps
-          docker-compose version
           id -u
           id -g
-          cat /etc/resolv.conf
-          dig google.com
-          curl -v https://github.com
+
+      - name: Show resolv.conf
+        run: cat /etc/resolv.conf
+
+      - name: dig google.com
+        run: dig google.com
+
+      - name: curl github.com
+        run: curl -v https://github.com
+
+      - name: Show docker user and group
+        run: |
           docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests id -u
           docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests id -g
-          docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v http://test-site.tribe
-          docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://github.com
-          docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://google.com
+        working-directory: dev/docker
+
+      - name: Curl test-site.tribe from inside the container
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v http://test-site.tribe
+        working-directory: dev/docker
+
+      - name: Curl github.com from inside the container
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://github.com
+        working-directory: dev/docker
+
+      - name: Curl google.com from inside the container
+        run: docker-compose --project-name=${{ env.PROJECT_ID }} exec -T php-tests curl -v https://google.com
         working-directory: dev/docker
